@@ -91,7 +91,7 @@ sub reload_permitted_paths {
 
 sub make_pmltq {
   my ($positions,%opts)=@_;
-  if (exists &Tree_Query::nodes_to_pmltq) {
+  if (exists &PMLTQ::nodes_to_pmltq) {
     my $cur = CurrentFile();
     my @open_files = ($cur ? ($cur, GetSecondaryFiles($cur)) : ());
     my %cur_fsfiles; @cur_fsfiles{@open_files}=();
@@ -137,7 +137,7 @@ sub make_pmltq {
       push @nodes, [ $win->{currentNode}, $win->{FSFile} ];
     }
     print STDERR "generating query";
-    return Tree_Query::nodes_to_pmltq(\@nodes,\%opts);
+    return PMLTQ::nodes_to_pmltq(\@nodes,\%opts);
   }
   print STDERR "Method nodes_to_pmltq not available\n";
   return;
