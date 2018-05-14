@@ -6,20 +6,46 @@ use PMLTQ::Base 'PMLTQ::Command';
 use PMLTQ;
 use File::Which;
 use File::Path qw( make_path );
+use File::Basename qw/fileparse dirname/;
+use File::ShareDir 'dist_dir';
+use File::Spec;
+use Hash::Merge 'merge';
 
 has usage => sub { shift->extract_usage };
+
+my $local_shared_dir = File::Spec->catdir(dirname(__FILE__), File::Spec->updir, File::Spec->updir, File::Spec->updir, 'share');
+my $shared_dir = eval {  dist_dir(__PACKAGE__) };
+
+# Assume installation
+if (-d $local_shared_dir or !$shared_dir) {
+  $shared_dir = $local_shared_dir;
+}
+
+sub DEFAULT_CONFIG {
+  my $btred = shift || $ENV{BTRED};
+  ($btred && -f $btred ) || which('btred') || die 'path to btred is not in --printserver-btred option nor in BTRED variable nor in PATH';
+  my $extensions = join(',', grep {! m/^!/} split("\n",`$btred --very-quiet --list-extensions`));
+  return {
+    tree_dir => 'svg',
+    btred => $btred || which('btred'),
+    extensions => $extensions
+  };
+}
 
 my %opts;
 
 sub run {
   my $self = shift;
   my @args = @_;
-  my $tree_dir = $config->{tree_dir};
+  my $config =  $self->config;
 
-  ($ENV{BTRED} && -f $ENV{BTRED} ) || which('btred') || die 'path to btred is not in BTRED variable or in PATH';
-  my $btred = $ENV{BTRED} || which('btred');
+  my $printtrees_config = merge( $config->{'printtrees'}||{}, DEFAULT_CONFIG(($config->{'printtrees'}||{})->{btred} ));
+  use Data::Dumper;print STDERR Dumper($printtrees_config);
+  my $tree_dir =  $printtrees_config->{'tree_dir'};
 
-  unless ( @{ $config->{layers} } > 0 ) {
+  my $data_dir = $config->{data_dir};
+  
+  unless ( $config->{layers} && @{ $config->{layers} } > 0 ) {
     print STDERR 'Nothing to print, no layers configured';
     return;
   }
@@ -28,13 +54,12 @@ sub run {
     print "Path '$tree_dir' has been created\n";
   }
   for my $layer ( @{ $config->{layers} } ) {
-    for my $file ( $self->files_for_layer($layer) ) {
-      my ($img_name,$img_dir) = fileparse($file,qr/\.[^\.]*/);
+    for my $file_in ( $self->files_for_layer($layer) ) {
+      my ($img_name,$img_dir) = fileparse($file_in,qr/\.[^\.]*/);
       $img_dir =~ s/$data_dir/$tree_dir/;
       make_path($img_dir) if ($img_dir && !(-d $img_dir));
       print STDERR "$data_dir\t$img_dir/$img_name\n";
-      $self->generate_trees($file,File::Spec->catfile($img_dir,$img_name));
-
+      $self->generate_trees($printtrees_config, $file_in,File::Spec->catfile($img_dir,$img_name));
     }
 
   }
@@ -44,9 +69,19 @@ sub run {
 }
 
 sub generate_trees {
-	my ($self, file_in, $file_out) = @_;
-	print STDERR "TODO generate_trees($file_in,$file_out)\n";
+  my ($self, $printtrees_config, $file_in, $file_out) = @_;
+
+  system($printtrees_config->{btred},
+  	'--config-file', File::Spec->catdir(shared_dir(),'btred.rc'),
+    '-Z',$self->config->{resources},
+    '-m', File::Spec->catdir(shared_dir(),'print_trees.btred'),
+    '--enable-extensions', $printtrees_config->{extensions},
+    '-o',
+      '--file-in',$file_in,
+      '--file-out', $file_out,
+      '--');
 }
+
 sub files_for_layer {
   my ( $self, $layer ) = @_;
 
@@ -65,6 +100,8 @@ sub load_filelist {
   map { File::Spec->file_name_is_absolute($_) ? $_ : File::Spec->catfile( $self->config->{data_dir}, $_ ) }
     grep { $_ !~ m/^\s*$/ } read_file( $filelist, chomp => 1, binmode => ':utf8' );
 }
+
+sub shared_dir { $shared_dir }
 
 =head1 SYNOPSIS
 
