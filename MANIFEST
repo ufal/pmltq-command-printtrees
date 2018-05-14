@@ -8,4 +8,7 @@ META.yml
 README
 README.md
 lib/PMLTQ/Command/printtrees.pm
+share/btred.rc
+share/pmltq-print-server/print.btred
+share/print_trees.btred
 t/00-compile.t

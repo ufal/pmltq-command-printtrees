@@ -3,3 +3,5 @@
 ^\.gitignore
 ^\.git
 ^\.build
+.*print_srvr.*.btred
+.*pmltq-print-server/README.md
