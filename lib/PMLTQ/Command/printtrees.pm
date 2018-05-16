@@ -116,13 +116,29 @@ Generate svg trees for given treebank. It works on local PML files.
 
 =head1 OPTIONS
 
-=head1 PARAMS
-
 =over 5
 
-=item B<treebank_config>
+=item B<--printtrees-btred>
 
-Path to configuration file. If a treebank_config is --, config is readed from STDIN.
+Path to btred script. If not set path in $BTRED variable is used. If neither of previous is set script seeks for btred in $PATH.
+
+=back
+
+=item B<--printtrees-btred_rc>
+
+Path to btred configuration. The most important settings is path to extensions.
+
+=back
+
+=item B<--printtrees-extensions>
+
+Comma separated list with extensions. Defaultly are used the same ones as in TrEd (list in extensions.lst optained with `btred --very-quiet --list-extensions`).
+
+=back
+
+=item B<--printtrees-tree_dir>
+
+Directory where sould be images stored. Default value is 'svg'.
 
 =back
 
