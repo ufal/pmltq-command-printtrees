@@ -1,4 +1,4 @@
 font='{Arial} 9'
 pml_compile=2
 
-ExtensionsDir=~/.tred.d/extensions
+preinstalledExtensionsDir=~/.tred.d/extensions

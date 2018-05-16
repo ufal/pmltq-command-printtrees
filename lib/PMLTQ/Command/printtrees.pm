@@ -26,6 +26,7 @@ sub DEFAULT_CONFIG {
   ($btred && -f $btred ) || which('btred') || die 'path to btred is not in --printserver-btred option nor in BTRED variable nor in PATH';
   my $extensions = join(',', grep {! m/^!/} split("\n",`$btred --very-quiet --list-extensions`));
   return {
+    btred_rc => File::Spec->catdir(shared_dir(),'btred.rc'),
     tree_dir => 'svg',
     btred => $btred || which('btred'),
     extensions => $extensions
@@ -53,6 +54,8 @@ sub run {
     make_path($tree_dir) or die "Unable to create directory $tree_dir\n";
     print "Path '$tree_dir' has been created\n";
   }
+  print STDERR "WARNING: No extension is loaded !!!" unless $printtrees_config->{extensions};
+  
   for my $layer ( @{ $config->{layers} } ) {
     for my $file_in ( $self->files_for_layer($layer) ) {
       my ($img_name,$img_dir) = fileparse($file_in,qr/\.[^\.]*/);
@@ -72,7 +75,7 @@ sub generate_trees {
   my ($self, $printtrees_config, $file_in, $file_out) = @_;
 
   system($printtrees_config->{btred},
-  	'--config-file', File::Spec->catdir(shared_dir(),'btred.rc'),
+    '--config-file', $printtrees_config->{btred_rc},
     '-Z',$self->config->{resources},
     '-m', File::Spec->catdir(shared_dir(),'print_trees.btred'),
     '--enable-extensions', $printtrees_config->{extensions},
