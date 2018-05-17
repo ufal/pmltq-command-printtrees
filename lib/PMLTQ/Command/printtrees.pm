@@ -57,33 +57,20 @@ sub run {
   print STDERR "WARNING: No extension is loaded !!!" unless $printtrees_config->{extensions};
   
   for my $layer ( @{ $config->{layers} } ) {
-    for my $file_in ( $self->files_for_layer($layer) ) {
-      my ($img_name,$img_dir) = fileparse($file_in,qr/\.[^\.]*/);
-      $img_dir =~ s/$data_dir/$tree_dir/;
-      make_path($img_dir) if ($img_dir && !(-d $img_dir));
-      print STDERR "$data_dir\t$img_dir/$img_name\n";
-      $self->generate_trees($printtrees_config, $file_in,File::Spec->catfile($img_dir,$img_name));
-    }
-
-  }
-
-
-  return 1;
-}
-
-sub generate_trees {
-  my ($self, $printtrees_config, $file_in, $file_out) = @_;
-
-  system($printtrees_config->{btred},
+  	  system($printtrees_config->{btred},
     '--config-file', $printtrees_config->{btred_rc},
     '-Z',$self->config->{resources},
     '-m', File::Spec->catdir(shared_dir(),'print_trees.btred'),
     '--enable-extensions', $printtrees_config->{extensions},
     '-o',
-      '--file-in',$file_in,
-      '--file-out', $file_out,
+      '--data-dir', $data_dir,
+      '--output-dir', $tree_dir,
+      $self->files_for_layer($layer),
       '--');
+  }
+  return 1;
 }
+
 
 sub files_for_layer {
   my ( $self, $layer ) = @_;
