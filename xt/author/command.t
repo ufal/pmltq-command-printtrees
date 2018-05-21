@@ -4,14 +4,15 @@ use Test::Most;
 use File::Which;
 use File::Spec;
 use File::Temp;
-use File::Basename qw/dirname basename/;
+use File::Basename qw/fileparse dirname basename/;
+use File::Grep;
 use lib File::Spec->rel2abs( File::Spec->catdir( dirname(__FILE__),File::Spec->updir, File::Spec->updir, 'lib' ) );
 use Capture::Tiny ':all';
 use PMLTQ::Command::printtrees;
 use PMLTQ::Commands;
 use LWP::Simple;
 use Archive::Unzip::Burst;
-
+use Treex::PML;
 
 is(which('btred'),undef,'btred is not in $PATH'); # make sure that btred is not in path
 is($ENV{BTRED},undef,'btred is not in $ENV{BTRED}');# make sure that btred is not in $ENV{BtRED}
@@ -71,7 +72,7 @@ close $fh;
 ok(-f $extensions_list_path , "$extensions_list_path  is created");
 
 for my $ext (keys %extensions) {
-  is(getstore("http://ufal.mff.cuni.cz/tred/extensions/$extensions{$ext}/$ext.zip", File::Spec->catdir($extension_dir_path,"$ext.zip")),200,"downloading http://ufal.mff.cuni.cz/tred/extensions/$extensions{$ext}/$ext.zip") ; 
+  is(getstore("http://ufal.mff.cuni.cz/tred/extensions/$extensions{$ext}/$ext.zip", File::Spec->catdir($extension_dir_path,"$ext.zip")),200,"downloading http://ufal.mff.cuni.cz/tred/extensions/$extensions{$ext}/$ext.zip") ;
   $h =  capture_merged {
   	lives_ok { Archive::Unzip::Burst::unzip( File::Spec->catdir($extension_dir_path,"$ext.zip"), File::Spec->catdir($extension_dir_path,"$ext"))} "unpacking $ext.zip"
   };
@@ -93,5 +94,79 @@ like($h,"/(Context: PDT_30_A.*){3}/sm",'PDT_30_A contex is set');
 like($h,"/(Stylesheet: PDT_30_A.*){3}/sm",'PDT_30_A stylesheet is set');
 like($h,"/(Context: PDT_30_T.*){3}/sm",'PDT_30_T contex is set');
 like($h,"/(Stylesheet: PDT_30_T.*){3}/sm",'PDT_30_T stylesheet is set');
+
+
+my $cmd = PMLTQ::Command::printtrees->new(
+    config => {
+      printtrees => {
+        btred_rc => $btred_rc_path,
+        btred => $btred_path,
+        extensions => join(',',keys %extensions),
+        tree_dir => $tmp_dir->dirname},
+      %tb_config});
+
+
+my %files;
+
+my $data_dir = $tb_config{data_dir};
+my $output_dir = $cmd->config->{printtrees}->{tree_dir};
+
+Treex::PML::AddResourcePath(
+       PMLTQ->resources_dir,
+       $tb_config{resources}
+      );
+
+for my $layer (@{ $cmd->config->{layers} }){
+  my $layername = $layer->{name};
+  $files{$layername} = {};
+  for my $file ($cmd->files_for_layer($layer)) {
+    my ($img_name,$img_dir) = fileparse($file,qr/\.[^\.]*/);
+    $img_dir =~ s/$data_dir/$output_dir/;
+    my $fsfile = Treex::PML::Factory->createDocumentFromFile($file);
+    $file = File::Spec->abs2rel ($file,  '.');
+    my $file_out = File::Spec->catfile($img_dir,$img_name);
+    $files{$layername}->{$file} = {
+      numtree => ($fsfile->lastTreeNo || -1) + 1, # number of trees in file
+      svgpath => $file_out # path to svg directory, for each tree is a file
+    };
+  }
+}
+
+for my $layername (keys %files){
+  subtest "test files on $layername layer" => sub {
+    for my $file (keys %{$files{$layername}}){
+      my $svgpath = $files{$layername}->{$file}->{svgpath};
+      my $numtree = $files{$layername}->{$file}->{numtree};
+
+      ok(-d $svgpath, "Directory for trees in $file exists");
+      ok($numtree > 0, "input file $file contains positive number of trees ($numtree)");
+      for my $svgnum (0..($numtree-1)) {
+        my $treenum = $svgnum+1;
+        my $svgfile = File::Spec->catfile($svgpath, sprintf("page_%03d.svg",$svgnum));
+        ok(-f $svgfile, "$svgfile exists");
+        ok(File::Grep::fgrep(sub {/<title>.* \($treenum\/$numtree\)<\/title>/},$svgfile), "correct svg title");
+      }
+    }
+  }
+}
+
+
+TODO: {
+  local $TODO = 'Failing svg compression...';
+  ok(undef);
+
+  for my $layername (keys %files){
+    subtest "test files on $layername layer" => sub {
+      for my $file (keys %{$files{$layername}}){
+        my $svgpath = $files{$layername}->{$file}->{svgpath};
+        my $numtree = $files{$layername}->{$file}->{numtree};
+        for my $svgfile (map {File::Spec->catfile($svgpath, sprintf("page_%03d.svg",$_))} (0..($numtree-1)) ) {
+          is(File::Grep::fgrep(sub {/<script[\s>]/},$svgfile),0, "$svgfile does not contain scripts");
+        }
+      }
+    }
+  }
+}
+
 
 done_testing();

@@ -47,7 +47,6 @@ my $output_dirname = delete $opts{'-out-dir'};
   if (ref($grp) eq 'HASH') {
     bless $grp, 'BTrEd::Print::Window';
   }
-
   package main;
   import TrEd::Utils ':all';
 
