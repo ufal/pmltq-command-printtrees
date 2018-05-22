@@ -9,5 +9,7 @@ Revision history for {{$dist->name}}
 
  [ENHANCEMENTS]
 
+speed increase: move looping throw files in layer from printtree command to btred. Btred is loaded once per layer.
+
 0.0.1
  - Released: 2018-05-16 14:05:31 UTC
