@@ -156,13 +156,11 @@ TODO: {
   ok(undef);
 
   for my $layername (keys %files){
-    subtest "test files on $layername layer" => sub {
-      for my $file (keys %{$files{$layername}}){
-        my $svgpath = $files{$layername}->{$file}->{svgpath};
-        my $numtree = $files{$layername}->{$file}->{numtree};
-        for my $svgfile (map {File::Spec->catfile($svgpath, sprintf("page_%03d.svg",$_))} (0..($numtree-1)) ) {
-          is(File::Grep::fgrep(sub {/<script[\s>]/},$svgfile),0, "$svgfile does not contain scripts");
-        }
+    for my $file (keys %{$files{$layername}}){
+      my $svgpath = $files{$layername}->{$file}->{svgpath};
+      my $numtree = $files{$layername}->{$file}->{numtree};
+      for my $svgfile (map {File::Spec->catfile($svgpath, sprintf("page_%03d.svg",$_))} (0..($numtree-1)) ) {
+        is(File::Grep::fgrep(sub {/<script[\s>]/},$svgfile),0, "$svgfile does not contain scripts");
       }
     }
   }
