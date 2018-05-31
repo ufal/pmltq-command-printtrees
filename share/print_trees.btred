@@ -56,7 +56,8 @@ sub generate_trees {
         -fileInfo => 1,
         -extraOptions => {
           use_svg_desc_and_title => 1,
-        }
+          compress => 1
+        },
       );
 
   }
