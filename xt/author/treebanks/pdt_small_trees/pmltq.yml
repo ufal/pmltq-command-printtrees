@@ -3,7 +3,7 @@ data_dir: "data"
 resources: "resources" # main directory with PML schemas
 
 db:
-  name: pdt_test
+  name: pdt_small_trees
   host: localhost
   port: 15432
   user: postgres

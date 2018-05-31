@@ -38,7 +38,7 @@ $h =  capture_merged {
 };
 like($h,"/no layers/","no layers is set");
 
-my $treebanks_dir = File::Spec->catdir('treebanks','pdt_test');
+my $treebanks_dir = File::Spec->catdir('treebanks','pdt_small_trees');
 my %tb_config = %{ PMLTQ::Commands::_load_config( File::Spec->catdir( dirname(__FILE__), $treebanks_dir, 'pmltq.yml' ) ) };
 
 my $tmp_dir = File::Temp->newdir( CLEANUP => 0 );
