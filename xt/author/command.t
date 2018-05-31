@@ -18,7 +18,9 @@ is(which('btred'),undef,'btred is not in $PATH'); # make sure that btred is not 
 is($ENV{BTRED},undef,'btred is not in $ENV{BTRED}');# make sure that btred is not in $ENV{BtRED}
 dies_ok { PMLTQ::Command::printtrees->new(config => {})->run() } "calling printtrees without btred";
 
-my $btred_path = '/opt/tred/btred';
+my $btred_path = $ENV{BTRED_PATH} || '/opt/tred/btred';
+
+print STDERR $ENV{BTRED_PATH} ? "Using custom \$ENV{BTRED_PATH}='$ENV{BTRED_PATH}'\n" : "Using default btred path '$btred_path'\n";
 
 ok( -f $btred_path, "right btred location: $btred_path");
 ok( -x $btred_path, "btred is executable");
