@@ -147,21 +147,6 @@ for my $layername (keys %files){
         my $svgfile = File::Spec->catfile($svgpath, sprintf("page_%03d.svg",$svgnum));
         ok(-f $svgfile, "$svgfile exists");
         ok(File::Grep::fgrep(sub {/<title>.* \($treenum\/$numtree\)<\/title>/},$svgfile), "correct svg title");
-      }
-    }
-  }
-}
-
-
-TODO: {
-  local $TODO = 'Failing svg compression...';
-  ok(undef);
-
-  for my $layername (keys %files){
-    for my $file (keys %{$files{$layername}}){
-      my $svgpath = $files{$layername}->{$file}->{svgpath};
-      my $numtree = $files{$layername}->{$file}->{numtree};
-      for my $svgfile (map {File::Spec->catfile($svgpath, sprintf("page_%03d.svg",$_))} (0..($numtree-1)) ) {
         is(File::Grep::fgrep(sub {/<script[\s>]/},$svgfile),0, "$svgfile does not contain scripts");
       }
     }
