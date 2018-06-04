@@ -30,6 +30,12 @@ my $h = capture_merged {
 };
 $valid_btred = like($h,"/btred - non-interactive scriptable version of the tree editor TrEd/ms","$btred_path looks like btred");
 
+$h = capture_merged {
+  lives_ok {  system($btred_path,'--version')} "calling btred version";
+};
+$h =~ s/^.*BTrEd\s*([0-9\.]*)\n.*$/$1/ms;
+$valid_btred &= cmp_ok($h, '>=', 2.5156,"btred - valid version (2.5156 - svg compression)");
+
 plan(skip_all => " !!! NO btred !!!") unless $valid_btred;
 
 
