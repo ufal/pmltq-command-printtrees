@@ -34,7 +34,8 @@ $h = capture_merged {
   lives_ok {  system($btred_path,'--version')} "calling btred version";
 };
 $h =~ s/^.*BTrEd\s*([0-9\.]*)\n.*$/$1/ms;
-$valid_btred &= cmp_ok($h, '>=', 2.5156,"btred - valid version (2.5156 - svg compression)");
+## $valid_btred &= cmp_ok($h, '>=', 2.5156,"btred - valid version (2.5156 - svg compression)");
+$valid_btred &= cmp_ok($h, '>=', 2.5157,"btred - valid version (2.5157 - create directory when one tree is in file)");
 
 plan(skip_all => " !!! NO btred !!!") unless $valid_btred;
 
@@ -134,7 +135,7 @@ for my $layer (@{ $cmd->config->{layers} }){
     $file = File::Spec->abs2rel ($file,  '.');
     my $file_out = File::Spec->catfile($img_dir,$img_name);
     $files{$layername}->{$file} = {
-      numtree => ($fsfile->lastTreeNo || -1) + 1, # number of trees in file
+      numtree => ($fsfile->lastTreeNo // -1) + 1, # number of trees in file
       svgpath => $file_out # path to svg directory, for each tree is a file
     };
   }
