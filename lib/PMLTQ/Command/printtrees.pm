@@ -41,11 +41,10 @@ sub run {
   my $config =  $self->config;
 
   my $printtrees_config = merge( $config->{'printtrees'}||{}, DEFAULT_CONFIG(($config->{'printtrees'}||{})->{btred} ));
-  use Data::Dumper;print STDERR Dumper($printtrees_config);
   my $tree_dir =  $printtrees_config->{'tree_dir'};
 
   my $data_dir = $config->{data_dir};
-  
+
   unless ( $config->{layers} && @{ $config->{layers} } > 0 ) {
     print STDERR 'Nothing to print, no layers configured';
     return;
@@ -55,7 +54,7 @@ sub run {
     print "Path '$tree_dir' has been created\n";
   }
   print STDERR "WARNING: No extension is loaded !!!" unless $printtrees_config->{extensions};
-  
+
   for my $layer ( @{ $config->{layers} } ) {
   	  system($printtrees_config->{btred},
     '--config-file', $printtrees_config->{btred_rc},
@@ -95,7 +94,7 @@ sub shared_dir { $shared_dir }
 
 =head1 SYNOPSIS
 
-  pmltq printtrees 
+  pmltq printtrees
 
 =head1 DESCRIPTION
 
