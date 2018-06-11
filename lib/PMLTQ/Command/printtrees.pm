@@ -45,10 +45,16 @@ sub run {
 
   my $data_dir = $config->{data_dir};
 
+  unless ($self->test_btred_version($printtrees_config->{'btred'})) {
+    print STDERR 'Minimum required BTrEd version is not satisfied';
+    return;
+  }
+
   unless ( $config->{layers} && @{ $config->{layers} } > 0 ) {
     print STDERR 'Nothing to print, no layers configured';
     return;
   }
+
   unless ( -d $tree_dir ) {
     make_path($tree_dir) or die "Unable to create directory $tree_dir\n";
     print "Path '$tree_dir' has been created\n";
@@ -92,6 +98,15 @@ sub load_filelist {
 
 sub shared_dir { $shared_dir }
 
+sub minimum_btred_version { 2.5157 }
+
+sub test_btred_version {
+  my $self = shift;
+  my $btred = shift;
+  my $version = `$btred --version`;
+  $version =~ s/^.*BTrEd\s*([0-9\.]*)\n.*$/$1/ms;
+  return $version >= $self->minimum_btred_version;
+}
 =head1 SYNOPSIS
 
   pmltq printtrees

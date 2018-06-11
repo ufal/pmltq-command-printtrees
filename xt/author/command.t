@@ -35,10 +35,24 @@ $h = capture_merged {
 };
 $h =~ s/^.*BTrEd\s*([0-9\.]*)\n.*$/$1/ms;
 ## $valid_btred &= cmp_ok($h, '>=', 2.5156,"btred - valid version (2.5156 - svg compression)");
-$valid_btred &= cmp_ok($h, '>=', 2.5157,"btred - valid version (2.5157 - create directory when one tree is in file)");
+## $valid_btred &= cmp_ok($h, '>=', 2.5157,"btred - valid version (2.5157 - create directory when one tree is in file)");
+$valid_btred &= cmp_ok($h, '>=',PMLTQ::Command::printtrees::minimum_btred_version ,"btred - valid version");
+
+my $tmp_dir_b = File::Temp->newdir( CLEANUP => 0 );
+my $invalid_btred_path = File::Spec->catdir($tmp_dir_b->dirname,'btred');
+open(my $fh, '>', $invalid_btred_path) or die "Could not open file $!";
+print $fh '#!/usr/bin/env perl
+print "BTrEd 0\nPerl: $]\nPlatform: $^O\n";
+exit;
+';
+close $fh;
+chmod 0755, $invalid_btred_path;
+$h =  capture_merged {
+  lives_ok { PMLTQ::Command::printtrees->new(config => {printtrees=>{btred=>$invalid_btred_path}})->run() } "calling printtrees with invalid btred version";
+};
+like($h,"/Minimum required BTrEd version is not satisfied/","Minimum required BTrEd version is not satisfied");
 
 plan(skip_all => " !!! NO btred !!!") unless $valid_btred;
-
 
 $h =  capture_merged {
   lives_ok { PMLTQ::Command::printtrees->new(config => {printtrees=>{btred=>$btred_path}})->run() } "calling printtrees with btred";
@@ -64,7 +78,7 @@ like($h,"/WARNING: No extension/","no extension is loaded");
 my $extension_dir = File::Temp->newdir( CLEANUP => 0 );
 my $extension_dir_path = $extension_dir->dirname;
 my $btred_rc_path = File::Spec->catdir($extension_dir_path,'btred.rc');
-open(my $fh, '>', $btred_rc_path) or die "Could not open file '$btred_rc_path' $!";
+open($fh, '>', $btred_rc_path) or die "Could not open file '$btred_rc_path' $!";
 print $fh "font='{Arial} 9'
 pml_compile=2
 
