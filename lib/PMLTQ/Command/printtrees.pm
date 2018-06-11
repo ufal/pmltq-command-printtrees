@@ -1,5 +1,6 @@
 package PMLTQ::Command::printtrees;
-
+our $AUTHORITY = 'cpan:MATY';
+$PMLTQ::Command::printtrees::VERSION = '0.1.0';
 # ABSTRACT: generate svg trees for given treebank
 
 use PMLTQ::Base 'PMLTQ::Command';
