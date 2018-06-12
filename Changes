@@ -5,6 +5,8 @@ Revision history for {{$dist->name}}
 
  [BUG FIXES]
 
+ - fixing wrong share directory path
+
  [DOCUMENTATION]
 
  [ENHANCEMENTS]

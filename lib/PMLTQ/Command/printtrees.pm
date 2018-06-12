@@ -14,7 +14,7 @@ use Hash::Merge 'merge';
 has usage => sub { shift->extract_usage };
 
 my $local_shared_dir = File::Spec->catdir(dirname(__FILE__), File::Spec->updir, File::Spec->updir, File::Spec->updir, 'share');
-my $shared_dir = eval {  dist_dir(__PACKAGE__) };
+my $shared_dir = eval {  dist_dir('PMLTQ-Command-printtrees') };
 
 # Assume installation
 if (-d $local_shared_dir or !$shared_dir) {
