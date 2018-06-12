@@ -107,6 +107,11 @@ sub test_btred_version {
   $version =~ s/^.*BTrEd\s*([0-9\.]*)\n.*$/$1/ms;
   return $version >= $self->minimum_btred_version;
 }
+
+=head1 NAME
+
+PMLTQ::Command::printtrees - Generate svg trees for given treebank.
+
 =head1 SYNOPSIS
 
   pmltq printtrees
