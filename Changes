@@ -1,13 +1,4 @@
-Revision history for {{$dist->name}}
-
-{{$NEXT}}
- [API CHANGES]
-
- [BUG FIXES]
-
- [DOCUMENTATION]
-
- [ENHANCEMENTS]
+Revision history for PMLTQ-Command-printtrees
 
 0.1.1
  - Released: 2018-06-12 09:18:09 UTC
