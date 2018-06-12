@@ -5,11 +5,15 @@ Revision history for {{$dist->name}}
 
  [BUG FIXES]
 
- - fixing wrong share directory path
-
  [DOCUMENTATION]
 
  [ENHANCEMENTS]
+
+0.1.1
+ - Released: 2018-06-12 09:18:09 UTC
+
+ [BUG FIXES]
+ - fixing wrong share directory path
 
 0.1.0
  - Released: 2018-06-11 12:45:57 UTC
