@@ -10,6 +10,7 @@ use File::Basename qw/fileparse dirname/;
 use File::ShareDir 'dist_dir';
 use File::Spec;
 use Hash::Merge 'merge';
+use Parallel::ForkManager;
 
 has usage => sub { shift->extract_usage };
 
@@ -61,18 +62,33 @@ sub run {
   }
   print STDERR "WARNING: No extension is loaded !!!" unless $printtrees_config->{extensions};
 
+  my @layer_files;
+  my $pm = Parallel::ForkManager->new(8);
+  my $maxlen = 0;
   for my $layer ( @{ $config->{layers} } ) {
-  	  system($printtrees_config->{btred},
-    '--config-file', $printtrees_config->{btred_rc},
-    '-Z',$self->config->{resources},
-    '-m', File::Spec->catdir(shared_dir(),'print_trees.btred'),
-    '--enable-extensions', $printtrees_config->{extensions},
-    '-o',
-      '--data-dir', $data_dir,
-      '--output-dir', $tree_dir,
-      $self->files_for_layer($layer),
-      '--');
+    my @layerf = $self->files_for_layer($layer);
+    $maxlen = scalar @layerf > $maxlen ? scalar @layerf : $maxlen;
+    push @layer_files, [@layerf];
   }
+
+  my @all_layer_files = map {my $idx = $_; map {defined $_->[$idx] ? $_->[$idx] : ()} @layer_files}  (0 .. ($maxlen-1));
+  my @all_files = ();
+  push @all_files, [ splice @all_layer_files, 0, 50 ] while @all_layer_files;
+  foreach my $files (@all_files){
+    system($printtrees_config->{btred},
+      '--config-file', $printtrees_config->{btred_rc},
+      '-Z',$self->config->{resources},
+      '-m', File::Spec->catdir(shared_dir(),'print_trees.btred'),
+      '--enable-extensions', $printtrees_config->{extensions},
+      '-o',
+        '--data-dir', $data_dir,
+        '--output-dir', $tree_dir,
+        @$files,
+        '--');
+    $pm->finish;
+  }
+
+  $pm->wait_all_children;
   return 1;
 }
 
