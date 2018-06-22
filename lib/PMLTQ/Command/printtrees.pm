@@ -30,7 +30,11 @@ sub DEFAULT_CONFIG {
     btred_rc => File::Spec->catdir(shared_dir(),'btred.rc'),
     tree_dir => 'svg',
     btred => $btred || which('btred'),
-    extensions => $extensions
+    extensions => $extensions,
+    parallel => {
+      job_size => 50,
+      forks => 8
+    }
   };
 }
 
@@ -63,7 +67,7 @@ sub run {
   print STDERR "WARNING: No extension is loaded !!!" unless $printtrees_config->{extensions};
 
   my @layer_files;
-  my $pm = Parallel::ForkManager->new(8);
+  my $pm = Parallel::ForkManager->new($config->{printtrees}->{parallel}->{forks});
   my $maxlen = 0;
   for my $layer ( @{ $config->{layers} } ) {
     my @layerf = $self->files_for_layer($layer);
@@ -71,9 +75,9 @@ sub run {
     push @layer_files, [@layerf];
   }
 
-  my @all_layer_files = map {my $idx = $_; map {defined $_->[$idx] ? $_->[$idx] : ()} @layer_files}  (0 .. ($maxlen-1));
+  my @all_layer_files = map {my $idx = $_; map {defined $_->[$idx] ? $_->[$idx] : ()} @layer_files}  (0 .. ($maxlen-1)); # schuffle files - balancing job difficultness
   my @all_files = ();
-  push @all_files, [ splice @all_layer_files, 0, 50 ] while @all_layer_files;
+  push @all_files, [ splice @all_layer_files, 0, $config->{printtrees}->{parallel}->{job_size} ] while @all_layer_files;
   foreach my $files (@all_files){
     $pm->start and next;
     system($printtrees_config->{btred},
