@@ -75,6 +75,7 @@ sub run {
   my @all_files = ();
   push @all_files, [ splice @all_layer_files, 0, 50 ] while @all_layer_files;
   foreach my $files (@all_files){
+    $pm->start and next;
     system($printtrees_config->{btred},
       '--config-file', $printtrees_config->{btred_rc},
       '-Z',$self->config->{resources},
