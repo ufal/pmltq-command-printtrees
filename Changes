@@ -2,12 +2,16 @@ Revision history for {{$dist->name}}
 
 {{$NEXT}}
  [API CHANGES]
+ - added parameters:
+   - printtrees-parallel-job_size - size of parallel job (default 50)
+   - printtrees-parallel-forks - maximum of parallel jobs (default 8)
 
  [BUG FIXES]
 
  [DOCUMENTATION]
 
  [ENHANCEMENTS]
+  - add parallel tree generation - multiple BTrEd instances are run
 
 0.1.1
  - Released: 2018-06-12 09:18:09 UTC
