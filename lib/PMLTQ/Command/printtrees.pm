@@ -66,9 +66,20 @@ sub run {
   }
   print STDERR "WARNING: No extension is loaded !!!" unless $printtrees_config->{extensions};
 
+  unless($printtrees_config->{parallel}->{forks} || $printtrees_config->{parallel}->{forks} > 0) {
+    print STDERR "invalid --printtrees-parallel-forks value ". ($printtrees_config->{parallel}->{forks}//'undef');
+    return 1;
+  }
+
+  unless($printtrees_config->{parallel}->{job_size} || $printtrees_config->{parallel}->{job_size} > 0) {
+    print STDERR "invalid --printtrees-parallel-job_size value ". ($printtrees_config->{parallel}->{job_size}//'undef');
+    return 1;
+  }
+
   my @layer_files;
-  my $pm = Parallel::ForkManager->new($config->{printtrees}->{parallel}->{forks});
+  my $pm = Parallel::ForkManager->new($printtrees_config->{parallel}->{forks});
   my $maxlen = 0;
+
   for my $layer ( @{ $config->{layers} } ) {
     my @layerf = $self->files_for_layer($layer);
     $maxlen = scalar @layerf > $maxlen ? scalar @layerf : $maxlen;
@@ -77,7 +88,7 @@ sub run {
 
   my @all_layer_files = map {my $idx = $_; map {defined $_->[$idx] ? $_->[$idx] : ()} @layer_files}  (0 .. ($maxlen-1)); # schuffle files - balancing job difficultness
   my @all_files = ();
-  push @all_files, [ splice @all_layer_files, 0, $config->{printtrees}->{parallel}->{job_size} ] while @all_layer_files;
+  push @all_files, [ splice @all_layer_files, 0, $printtrees_config->{parallel}->{job_size} ] while @all_layer_files;
   foreach my $files (@all_files){
     $pm->start and next;
     system($printtrees_config->{btred},
@@ -155,6 +166,14 @@ Comma separated list with extensions. Defaultly are used the same ones as in TrE
 =item B<--printtrees-tree_dir>
 
 Directory where sould be images stored. Default value is 'svg'.
+
+=item B<printtrees-parallel-job_size>
+
+Size of one job, default is 50.
+
+=item B<printtrees-parallel-forks>
+
+Maximum number of parallel jobs, default is 8.
 
 =back
 
