@@ -6,9 +6,14 @@ Revision history for {{$dist->name}}
  [BUG FIXES]
 
  [DOCUMENTATION]
- - fix documentation
 
  [ENHANCEMENTS]
+
+1.0.1
+ - Released: 2019-01-11 15:09:14 UTC
+
+ [DOCUMENTATION]
+ - fix documentation
 
 1.0.0
  - Released: 2019-01-11 12:57:03 UTC
