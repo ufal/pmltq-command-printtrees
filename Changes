@@ -7,6 +7,7 @@ Revision history for {{$dist->name}}
    - printtrees-parallel-forks - maximum of parallel jobs (default 8)
 
  [BUG FIXES]
+ - increase minimal PMLTQ version
 
  [DOCUMENTATION]
 
