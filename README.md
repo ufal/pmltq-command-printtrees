@@ -1,6 +1,6 @@
 # pmltq-command-printtrees
 
-This perl module adds to `pmltq` (from [PMLTQ](https://github.com/ufal/perl-pmltq)) subcommand `pmltq printtrees`. Module depends on btred which is part of [TrEd](https://ufal.mff.cuni.cz/tred/).
+This perl module adds to `pmltq` (from [PMLTQ::Commands](https://github.com/ufal/pmltq-commands)) subcommand `pmltq printtrees`. Module depends on btred which is part of [TrEd](https://ufal.mff.cuni.cz/tred/).
 
 ## Running
 You can run tree generation with this command `pmltq printtrees`. This values are used in default:
@@ -26,6 +26,4 @@ xvfb-run pmltq printtrees
 
 ## Instalation
 
-nainstalovat extensiony !!!
-
-nainstalovat btred a dát cerstu do BTRED_PATH, aby při instalaci proběhly testy
+If you want to run tests during installation you should install btred and add btred path to `BTRED_PATH` environment variable.
